@@ -5,20 +5,16 @@ import (
 	"log"
 	"os"
 
-	"github.com/joho/godotenv"
+	"github.com/username/TIBENT/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
+// DB: グローバルなデータベースインスタンス
 var DB *gorm.DB
 
+// ConnectDB: データベースに接続する関数
 func ConnectDB() {
-	// .envファイルを読み込む
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
-
 	// 環境変数から接続情報を取得
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		os.Getenv("DB_HOST"),
@@ -36,4 +32,12 @@ func ConnectDB() {
 	}
 
 	log.Println("Database connection established")
+
+	// マイグレーションの実行
+	err := DB.AutoMigrate(&models.Event{})
+	if err != nil {
+		log.Fatalf("Failed to run migrations: %v", err)
+	}
+	log.Println("Database migration completed")
+
 }
